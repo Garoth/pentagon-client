@@ -36,10 +36,25 @@ func SendMessage() {
         log.Fatalln("Couldn't dial server:", err)
     }
 
-    componentInfo := &pentagonmodel.ComponentInfo{"Email", "Main"}
+    componentInfo := &pentagonmodel.ClientHeader{}
+    componentInfo.Component = pentagonmodel.COMPONENT_EMAIL
+    componentInfo.Subcomponent = pentagonmodel.SUBCOMPONENT_EMAIL_MAIN
     bytes, err := json.Marshal(componentInfo)
     if err != nil {
         log.Fatalln("Error encoding component info:", err)
+    }
+
+    websocket.Message.Send(ws, string(bytes))
+
+    emailMessage := &pentagonmodel.MailComponentMessage{}
+    emailMessage.To = "garoth@gmail.com"
+    emailMessage.From = "garoth@gmail.com"
+    emailMessage.Subject = "Pentagon Test"
+    emailMessage.Message = "Hello!\nTest"
+
+    bytes, err = json.Marshal(emailMessage)
+    if err != nil {
+        log.Fatalln("Error encoding email message:", err)
     }
 
     websocket.Message.Send(ws, string(bytes))

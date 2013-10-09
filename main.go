@@ -33,6 +33,7 @@ func main() {
     if err != nil {
         log.Fatalln("Couldn't dial server:", err)
     }
+    defer WEBSOCKET.Close()
 
     TryKV()
 }
@@ -48,7 +49,7 @@ func SendMessage() {
 
     websocket.Message.Send(WEBSOCKET, string(bytes))
 
-    emailMessage := &pentagonmodel.MailComponentMessage{}
+    emailMessage := &pentagonmodel.MailMessage{}
     emailMessage.To = "garoth@gmail.com"
     emailMessage.From = "garoth@gmail.com"
     emailMessage.Subject = "Pentagon Test"
@@ -87,4 +88,11 @@ func TryKV() {
     command2.Key = "herro"
     bytes, _ = json.Marshal(command2)
     websocket.Message.Send(WEBSOCKET, string(bytes))
+
+    var reply pentagonmodel.KeyValueResponse
+    err := websocket.JSON.Receive(WEBSOCKET, &reply)
+    if err != nil {
+        log.Fatalln("Err reading kv reply", err)
+    }
+    log.Println("Received value", reply.Value, "for key", reply.Key)
 }

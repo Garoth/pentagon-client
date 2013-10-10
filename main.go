@@ -35,32 +35,18 @@ func main() {
     }
     defer WEBSOCKET.Close()
 
-    TryKV()
+    TryGit()
 }
 
-func SendMessage() {
-    componentInfo := &pentagonmodel.ClientHeader{}
-    componentInfo.Component = pentagonmodel.COMPONENT_EMAIL
-    componentInfo.Subcomponent = pentagonmodel.SUBCOMPONENT_EMAIL_MAIN
-    bytes, err := json.Marshal(componentInfo)
-    if err != nil {
-        log.Fatalln("Error encoding component info:", err)
-    }
+func TryGit() {
+    header := &pentagonmodel.ClientHeader{}
+    header.Component = pentagonmodel.COMPONENT_GIT
+    header.Subcomponent = pentagonmodel.SUBCOMPONENT_GIT_WATCH
+    websocket.JSON.Send(WEBSOCKET, header)
 
-    websocket.Message.Send(WEBSOCKET, string(bytes))
-
-    emailMessage := &pentagonmodel.MailMessage{}
-    emailMessage.To = "garoth@gmail.com"
-    emailMessage.From = "garoth@gmail.com"
-    emailMessage.Subject = "Pentagon Test"
-    emailMessage.Message = "Hello!\nTest"
-
-    bytes, err = json.Marshal(emailMessage)
-    if err != nil {
-        log.Fatalln("Error encoding email message:", err)
-    }
-
-    websocket.Message.Send(WEBSOCKET, string(bytes))
+    command := &pentagonmodel.GitWatchMessage{}
+    command.URL = "git@github.com:evernote/announcements-feed.git"
+    websocket.JSON.Send(WEBSOCKET, command)
 }
 
 func TryKV() {
@@ -95,4 +81,29 @@ func TryKV() {
         log.Fatalln("Err reading kv reply", err)
     }
     log.Println("Received value", reply.Value, "for key", reply.Key)
+}
+
+func TryEmail() {
+    componentInfo := &pentagonmodel.ClientHeader{}
+    componentInfo.Component = pentagonmodel.COMPONENT_EMAIL
+    componentInfo.Subcomponent = pentagonmodel.SUBCOMPONENT_EMAIL_MAIN
+    bytes, err := json.Marshal(componentInfo)
+    if err != nil {
+        log.Fatalln("Error encoding component info:", err)
+    }
+
+    websocket.Message.Send(WEBSOCKET, string(bytes))
+
+    emailMessage := &pentagonmodel.MailMessage{}
+    emailMessage.To = "garoth@gmail.com"
+    emailMessage.From = "garoth@gmail.com"
+    emailMessage.Subject = "Pentagon Test"
+    emailMessage.Message = "Hello!\nTest"
+
+    bytes, err = json.Marshal(emailMessage)
+    if err != nil {
+        log.Fatalln("Error encoding email message:", err)
+    }
+
+    websocket.Message.Send(WEBSOCKET, string(bytes))
 }
